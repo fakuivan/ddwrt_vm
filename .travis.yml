@@ -1,0 +1,18 @@
+#
+addons:
+    apt_packages:
+        - virtualbox
+        - sshpass
+        
+install:
+    - ifconfig
+    - sudo adduser $USER vboxusers
+    - VM="DD-WRT_x86_(Generated)"
+    - IP_NET='192.168.1' && ROUTER_IP="$IP_NET.1"
+    - ./make_ddwrt_vm.sh "$VM" "$IP_NET"
+    - ifconfig
+    - vboxmanage startvm "$VM" --type headless
+    # usually the vm takes 8 seconds to boot up, 20 is quite overkill but it should avoid sporadic problems
+    - sleep 20
+    - sshpass -p "admin" ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 "root@$ROUTER_IP" uptime
+    - vboxmanage controlvm "$VM" poweroff
